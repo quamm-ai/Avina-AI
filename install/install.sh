@@ -159,7 +159,7 @@ prompt_input "Enter top-level domain (e.g., co.il)" TLD "co.il"
 DEFAULT_DOMAIN="${ENV_TYPE}.avina.${CLIENT_ID}.${TLD}"
 prompt_input "Full domain for the service" DOMAIN "$DEFAULT_DOMAIN"
 prompt_input "Email for SSL certificate alerts" CERTBOT_EMAIL "devops@${CLIENT_ID}.${TLD}"
-prompt_password "MongoDB root password" MONGO_ROOT_PASSWORD
+prompt_password "PostgreSQL password" POSTGRES_PASSWORD
 
 # --- Auto-detect values ---
 CURRENT_UID=$(id -u "$SUDO_USER")
@@ -168,12 +168,12 @@ info "Detected UID=${CURRENT_UID} and GID=${CURRENT_GID} for user '$SUDO_USER'."
 
 # --- Finalize variables based on environment ---
 if [ "$ENV_TYPE" == "qa" ]; then
-    MONGO_ROOT_USER="AvinaQA"
-    MONGO_DATABASE="avina_qa"
+    POSTGRES_USER="avina_qa"
+    POSTGRES_DB="avina_qa"
     COMPOSE_PROJECT_NAME="avina_qa"
 else
-    MONGO_ROOT_USER="AvinaProd"
-    MONGO_DATABASE="avina_prod"
+    POSTGRES_USER="avina_prod"
+    POSTGRES_DB="avina_prod"
     COMPOSE_PROJECT_NAME="avina_prod"
 fi
 success "Configuration gathered."
@@ -214,10 +214,10 @@ NGINX_CONFIG_FILE=${NGINX_CONFIG_FILE}
 DOMAIN=${DOMAIN}
 CERTBOT_EMAIL=${CERTBOT_EMAIL}
 
-# --- MongoDB ---
-MONGO_ROOT_USER=${MONGO_ROOT_USER}
-MONGO_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
-MONGO_DATABASE=${MONGO_DATABASE}
+# --- PostgreSQL ---
+POSTGRES_USER=${POSTGRES_USER}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+POSTGRES_DB=${POSTGRES_DB}
 
 # --- Common ---
 N8N_UID=${CURRENT_UID}

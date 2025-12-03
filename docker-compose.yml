@@ -1,5 +1,5 @@
 # This is the main Docker Compose file for the Avina project.
-# It combines both infrastructure (NGINX, MongoDB) and application (n8n) services.
+# It combines both infrastructure (NGINX, Postgres) and application (n8n) services.
 
 services:
   # --- Infrastructure Services ---
@@ -20,23 +20,22 @@ services:
       - n8n
     restart: unless-stopped
 
-  mongodb:
-    image: mongo:7.0
-    container_name: avina-mongodb
+  postgres:
+    image: postgres:16
+    container_name: avina-postgres
     ports:
-      - "27017:27017"
+      - "5432:5432"
     deploy:
       resources:
         limits:
           cpus: "1.0"
           memory: 2G
     volumes:
-      - ./data/mongodb:/data/db
+      - ./data/postgres:/var/lib/postgresql/data
     environment:
-      MONGO_INITDB_ROOT_USERNAME: "${MONGO_ROOT_USER}"
-      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_ROOT_PASSWORD}"
-      MONGO_INITDB_DATABASE: "${MONGO_DATABASE}"
-    command: ["mongod", "--auth", "--bind_ip_all"]
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
     networks:
       - avina_network
     restart: unless-stopped
@@ -67,15 +66,14 @@ services:
       - N8N_CONCURRENCY_PRODUCTION_LIMIT=20
       - N8N_CUSTOM_EXTENSIONS=/home/node/.n8n/custom
       # Explicitly set HOME to match the volume mount point
-      # This fixes the EACCES: permission denied, mkdir '/.n8n' error
       - HOME=/home/node
-      # Ensure n8n waits for the database to be ready
-      - DB_TYPE=mongodb
-      - DB_MONGODB_HOST=mongodb
-      - DB_MONGODB_PORT=27017
-      - DB_MONGODB_DATABASE=${MONGO_DATABASE}
-      - DB_MONGODB_USER=${MONGO_ROOT_USER}
-      - DB_MONGODB_PASSWORD=${MONGO_ROOT_PASSWORD}
+      # Postgres Configuration
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=${POSTGRES_DB}
+      - DB_POSTGRESDB_USER=${POSTGRES_USER}
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       # Use relative paths for portability
       - ./data/n8n:/home/node/.n8n
@@ -86,7 +84,7 @@ services:
     networks:
       - avina_network
     depends_on:
-      - mongodb
+      - postgres
     restart: unless-stopped
 
 networks:
