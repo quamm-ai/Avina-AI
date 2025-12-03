@@ -58,17 +58,17 @@ After the initial deployment, you can manage the stack from the deployment direc
 
 -   **Start all services:**
     ```bash
-    docker-compose -f docker-compose.infra.yml -f docker-compose.apps.yml up -d
+    docker-compose up -d
     ```
 
 -   **Stop all services:**
     ```bash
-    docker-compose -f docker-compose.infra.yml -f docker-compose.apps.yml down
+    docker-compose down
     ```
 
 -   **View logs:**
     ```bash
-    docker-compose -f docker-compose.infra.yml -f docker-compose.apps.yml logs -f
+    docker-compose logs -f
     ```
 
 ## Security

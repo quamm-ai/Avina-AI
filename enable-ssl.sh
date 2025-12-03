@@ -51,7 +51,7 @@ fi
 
 echo "INFO: Restarting Avina stack with new SSL configuration..."
 cd "$AVINA_DIR"
-docker compose -f docker-compose.infra.yml -f docker-compose.apps.yml up -d --force-recreate nginx
+docker compose up -d --force-recreate nginx
 
 echo "✅ SUCCESS: SSL has been enabled. Nginx has been restarted."
 echo "Your Avina instance should now be available via HTTPS."

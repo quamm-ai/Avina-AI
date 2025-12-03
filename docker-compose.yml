@@ -1,0 +1,94 @@
+version: '3.8'
+
+# This is the main Docker Compose file for the Avina project.
+# It combines both infrastructure (NGINX, MongoDB) and application (n8n) services.
+
+services:
+  # --- Infrastructure Services ---
+  nginx:
+    build:
+      context: ./nginx
+    container_name: avina-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/${NGINX_CONFIG_FILE}:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl/private
+      - ./static:/var/www/static_html:ro # Optional: for serving static content
+    networks:
+      - avina_network
+    depends_on:
+      - n8n
+    restart: unless-stopped
+
+  mongodb:
+    image: mongo:7.0
+    container_name: avina-mongodb
+    ports:
+      - "27017:27017"
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 2G
+    volumes:
+      - ./data/mongodb:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_ROOT_USER}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_ROOT_PASSWORD}"
+      MONGO_INITDB_DATABASE: "${MONGO_DATABASE}"
+    command: ["mongod", "--auth", "--bind_ip_all"]
+    networks:
+      - avina_network
+    restart: unless-stopped
+
+  # --- Application Services ---
+  n8n:
+    # Pinned to a specific version instead of 'latest'
+    image: n8nio/n8n:1.45.1
+    container_name: avina-n8n
+    deploy:
+      resources:
+        limits:
+          cpus: "6"
+          memory: 4G
+    # Use the user:group from the .env file for correct file permissions.
+    user: "${N8N_UID}:${N8N_GID}"
+    environment:
+      # Configuration is loaded from the .env file
+      - N8N_HOST=${DOMAIN}
+      - N8N_PROTOCOL=https
+      - N8N_PATH=/n8n/
+      - N8N_PORT=5678
+      - N8N_TRUST_PROXY=true
+      - EXPRESS_TRUST_PROXY=true
+      - N8N_DISABLE_RATE_LIMIT=true
+      - WEBHOOK_URL=https://${DOMAIN}/n8n/
+      - N8N_EDITOR_BASE_URL=https://${DOMAIN}/n8n/
+      - N8N_CONCURRENCY_PRODUCTION_LIMIT=20
+      - N8N_CUSTOM_EXTENSIONS=/home/node/.n8n/custom
+      # Ensure n8n waits for the database to be ready
+      - DB_TYPE=mongodb
+      - DB_MONGODB_HOST=mongodb
+      - DB_MONGODB_PORT=27017
+      - DB_MONGODB_DATABASE=${MONGO_DATABASE}
+      - DB_MONGODB_USER=${MONGO_ROOT_USER}
+      - DB_MONGODB_PASSWORD=${MONGO_ROOT_PASSWORD}
+    volumes:
+      # Use relative paths for portability
+      - ./data/n8n:/home/node/.n8n
+      - ./n8n/custom:/home/node/.n8n/custom
+      # These paths are now located within the 'browser' directory
+      - ./browser/uploads:/uploads
+      - ./browser/downloads:/browser_downloads
+    networks:
+      - avina_network
+    depends_on:
+      - mongodb
+    restart: unless-stopped
+
+networks:
+  avina_network:
+    driver: bridge
+
