@@ -1,0 +1,18 @@
+# Ignore environment configuration files
+*.env
+
+# Ignore persistent data volumes for services
+data/
+
+# Ignore file uploads and downloads from the browser service
+browser/uploads/
+browser/downloads/
+
+# Ignore SSL certificates and Let's Encrypt account info
+certbot/
+
+# Ignore macOS specific files
+.DS_Store
+
+# Ignore notes file
+notes
