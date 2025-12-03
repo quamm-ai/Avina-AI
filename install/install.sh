@@ -114,6 +114,21 @@ echo \
   tee /etc/apt/sources.list.d/docker.list > /dev/null
 apt-get update
 apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+# --- Install Docker Compose (if not installed as a plugin) ---
+if ! docker compose version &>/dev/null; then
+    info "Docker Compose plugin not found, installing standalone..."
+    LATEST_COMPOSE_VERSION=$(curl -s https://api.github.com/repos/docker/compose/releases/latest | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+    DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+    mkdir -p $DOCKER_CONFIG/cli-plugins
+    curl -SL https://github.com/docker/compose/releases/download/$LATEST_COMPOSE_VERSION/docker-compose-linux-x86_64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
+    chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+    # Make it available for all users
+    if [ -d "/usr/local/lib/docker/cli-plugins" ]; then
+        ln -sfn $DOCKER_CONFIG/cli-plugins/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose
+    fi
+fi
+
 success "Docker installed successfully."
 
 info "Creating shared group '$AVINA_GROUP' and project directory '$AVINA_DIR'..."
@@ -223,12 +238,12 @@ cd "$AVINA_DIR"
 info "Attempting to acquire SSL certificate with Certbot (this may take a minute)..."
 # Use Certbot's standalone mode to get a cert without needing NGINX to be running.
 # The --service-ports flag maps the container's ports 80/443 to the host for the challenge.
-docker-compose -f docker-compose.infra.yml run --rm --service-ports certbot certonly --standalone --email "${CERTBOT_EMAIL}" --agree-tos --no-eff-email -d "${DOMAIN}"
+docker compose -f docker-compose.infra.yml run --rm --service-ports certbot certonly --standalone --email "${CERTBOT_EMAIL}" --agree-tos --no-eff-email -d "${DOMAIN}"
 
 success "SSL certificate acquired."
 
 info "Launching the full Avina stack in the background..."
-docker-compose -f docker-compose.infra.yml -f docker-compose.apps.yml up -d
+docker compose -f docker-compose.infra.yml -f docker-compose.apps.yml up -d
 success "All services have been started."
 
 # ==============================================================================
