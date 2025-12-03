@@ -237,8 +237,9 @@ cd "$AVINA_DIR"
 
 info "Attempting to acquire SSL certificate with Certbot (this may take a minute)..."
 # Use Certbot's standalone mode to get a cert without needing NGINX to be running.
+# We MUST override the default entrypoint to run 'certonly' instead of the default 'renew' loop.
 # The --service-ports flag maps the container's ports 80/443 to the host for the challenge.
-docker compose -f docker-compose.infra.yml run --rm --service-ports certbot certonly --standalone --email "${CERTBOT_EMAIL}" --agree-tos --no-eff-email -d "${DOMAIN}"
+docker compose -f docker-compose.infra.yml run --rm --service-ports --entrypoint "certbot" certbot certonly --standalone --email "${CERTBOT_EMAIL}" --agree-tos --no-eff-email -d "${DOMAIN}"
 
 success "SSL certificate acquired."
 
