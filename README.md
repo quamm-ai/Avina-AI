@@ -21,18 +21,29 @@ The primary method for deploying a new Avina environment is through the interact
 
 ### Quick Start Guide
 
-1.  **Copy Project to Server:**
-    Transfer the entire project directory to the target Ubuntu server.
-
-2.  **Run the Installer:**
-    Navigate into the `install` directory and run the script with `sudo`.
-
+1.  **Connect to your VM and Install Git:**
+    Log into your new, clean Ubuntu VM and install Git.
     ```bash
-    cd install/
+    sudo apt-get update
+    sudo apt-get install git -y
+    ```
+
+2.  **Clone the Repository:**
+    Clone the project from GitHub into a temporary location, like your home directory.
+    ```bash
+    cd ~
+    git clone https://github.com/quamm-ai/Avina-AI.git
+    ```
+
+3.  **Run the Installer:**
+    Navigate into the `install` directory, make the script executable, and run it with `sudo`. The script will handle copying the project to its final destination (`/srv/avina`).
+    ```bash
+    cd ~/Avina-AI/install/
+    chmod +x install.sh
     sudo ./install.sh
     ```
 
-3.  **Follow the Prompts:**
+4.  **Follow the Prompts:**
     The script will guide you through a series of questions to configure the environment:
     -   Environment type (qa/prod)
     -   Client domain details

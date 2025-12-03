@@ -17,14 +17,19 @@ This script is the recommended and primary method for all new deployments.
 
 ## How to Run
 
-1.  **Copy Project:**
-    Ensure the entire Avina project directory (the parent of this `install` directory) is present on the target Ubuntu server.
+1.  **Install Git and Clone Project:**
+    On a clean Ubuntu server, connect via SSH, install `git`, and clone the repository into your home directory.
+    ```bash
+    sudo apt-get update && sudo apt-get install git -y
+    cd ~
+    git clone https://github.com/quamm-ai/Avina-AI.git
+    ```
 
 2.  **Navigate and Execute:**
-    Change into this directory and run the script with `sudo` privileges.
-
+    Change into this directory, make the script executable, and then run it with `sudo` privileges. The script will handle moving the project to its final destination (`/srv/avina`).
     ```bash
-    cd /path/to/project/install
+    cd ~/Avina-AI/install/
+    chmod +x install.sh
     sudo ./install.sh
     ```
 
