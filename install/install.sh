@@ -229,6 +229,13 @@ info "Setting final directory permissions..."
 chown -R "$SUDO_USER":"$AVINA_GROUP" "$AVINA_DIR"
 chmod -R 2775 "$AVINA_DIR"
 
+# Fix n8n data directory permissions to match the container user
+# The n8n container runs as the current user (N8N_UID), so we ensure ownership matches.
+if [ -d "${AVINA_DIR}/data/n8n" ]; then
+    info "Fixing permissions for n8n data directory..."
+    chown -R "${CURRENT_UID}:${CURRENT_GID}" "${AVINA_DIR}/data/n8n"
+fi
+
 info "Adding users to required groups..."
 prompt_input "Enter other admin usernames (comma-separated, no spaces)" OTHER_ADMINS
 ADMINS=$(echo "$SUDO_USER,$OTHER_ADMINS" | tr ',' ' ')
