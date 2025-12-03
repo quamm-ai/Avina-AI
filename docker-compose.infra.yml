@@ -10,25 +10,12 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
+      - ./nginx/${NGINX_CONFIG_FILE}:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/ssl/private
       - ./static:/var/www/static_html:ro # Optional: for serving static content
     networks:
       - app_network
-    # NGINX implicitly depends on the application services being available.
-    # The startup order is managed by the user when running both compose files.
     restart: unless-stopped
-
-  certbot:
-    image: certbot/certbot
-    container_name: avina-certbot
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h; done;'"
-    networks:
-      - app_network
 
   mongodb:
     image: mongo:7.0
