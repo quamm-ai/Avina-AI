@@ -1,5 +1,3 @@
-version: '3.8'
-
 # This is the main Docker Compose file for the Avina project.
 # It combines both infrastructure (NGINX, MongoDB) and application (n8n) services.
 
@@ -30,7 +28,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "2"
+          cpus: "1.0"
           memory: 2G
     volumes:
       - ./data/mongodb:/data/db
@@ -51,8 +49,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "6"
-          memory: 4G
+          cpus: "1.5"
+          memory: 3G
     # Use the user:group from the .env file for correct file permissions.
     user: "${N8N_UID}:${N8N_GID}"
     environment:
@@ -91,4 +89,3 @@ services:
 networks:
   avina_network:
     driver: bridge
-
