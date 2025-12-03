@@ -250,7 +250,9 @@ info "Starting Part 4: Initial Service Launch..."
 cd "$AVINA_DIR"
 
 info "Launching the full Avina stack in the background..."
-docker compose -f docker-compose.infra.yml -f docker-compose.apps.yml up -d
+# The order of compose files is important. The 'infra' file, which defines
+# the network, must come last to ensure its configuration takes precedence.
+docker compose -f docker-compose.apps.yml -f docker-compose.infra.yml up -d
 success "All services have been started."
 
 # ==============================================================================
