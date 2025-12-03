@@ -66,6 +66,9 @@ services:
       - N8N_EDITOR_BASE_URL=https://${DOMAIN}/n8n/
       - N8N_CONCURRENCY_PRODUCTION_LIMIT=20
       - N8N_CUSTOM_EXTENSIONS=/home/node/.n8n/custom
+      # Explicitly set HOME to match the volume mount point
+      # This fixes the EACCES: permission denied, mkdir '/.n8n' error
+      - HOME=/home/node
       # Ensure n8n waits for the database to be ready
       - DB_TYPE=mongodb
       - DB_MONGODB_HOST=mongodb
