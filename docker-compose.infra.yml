@@ -1,5 +1,3 @@
-version: '3.8'
-
 # This Docker Compose file defines the core infrastructure services for Avina.
 # It should be run alongside docker-compose.apps.yml
 
