@@ -250,8 +250,13 @@ info "Starting Part 4: Initial Service Launch..."
 cd "$AVINA_DIR"
 
 info "Launching the full Avina stack in the background..."
-# The order of compose files is important. The 'infra' file, which defines
-# the network, must come last to ensure its configuration takes precedence.
+# Explicitly create the network to satisfy the 'external: true' requirement
+# in docker-compose.apps.yml. This is safer than relying on file order.
+if ! docker network inspect "${COMPOSE_PROJECT_NAME}_app_network" &>/dev/null; then
+    info "Creating network '${COMPOSE_PROJECT_NAME}_app_network'..."
+    docker network create "${COMPOSE_PROJECT_NAME}_app_network"
+fi
+
 docker compose -f docker-compose.apps.yml -f docker-compose.infra.yml up -d
 success "All services have been started."
 
