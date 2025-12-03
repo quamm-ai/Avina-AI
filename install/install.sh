@@ -252,9 +252,9 @@ cd "$AVINA_DIR"
 info "Launching the full Avina stack in the background..."
 # Explicitly create the network to satisfy the 'external: true' requirement
 # in docker-compose.apps.yml. This is safer than relying on file order.
-if ! docker network inspect "${COMPOSE_PROJECT_NAME}_app_network" &>/dev/null; then
-    info "Creating network '${COMPOSE_PROJECT_NAME}_app_network'..."
-    docker network create "${COMPOSE_PROJECT_NAME}_app_network"
+if ! docker network inspect "avina_network" &>/dev/null; then
+    info "Creating network 'avina_network'..."
+    docker network create "avina_network"
 fi
 
 docker compose -f docker-compose.apps.yml -f docker-compose.infra.yml up -d
