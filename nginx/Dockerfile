@@ -9,3 +9,7 @@ COPY nginx.conf /etc/nginx/templates/nginx.conf.template
 # Set the entrypoint to automatically handle environment variable substitution.
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
+
+# Copy the entrypoint script that will substitute environment variables
+COPY init.sh /docker-entrypoint.d/40-init.sh
+RUN chmod +x /docker-entrypoint.d/40-init.sh

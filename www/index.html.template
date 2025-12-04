@@ -40,6 +40,9 @@
             Avina is an <strong>Artificial Virtual Insurance Agent</strong> that automates the entire car insurance renewal process.
             By intelligently monitoring portals, aggregating data, and managing communications, Avina transforms a process that used to take hours into minutes.
         </p>
+        <div class="env-info">
+            <p><strong>Environment:</strong> ${ENV_TYPE} | <strong>Domain:</strong> ${DOMAIN}</p>
+        </div>
     </div>
 </body>
 </html>

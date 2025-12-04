@@ -15,8 +15,8 @@ services:
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/templates/nginx.conf.template:ro
       - ./ssl:/etc/ssl/private:ro
-      # Mount the new directory for the static landing page
-      - ./www:/var/www/static_html:ro
+      # Mount the www directory, which now contains the template
+      - ./www:/var/www/static_html:rw
     networks:
       - avina_network
     depends_on:
