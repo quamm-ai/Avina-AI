@@ -1,5 +1,3 @@
-version: '3.8'
-
 # This is the main Docker Compose file for the Avina project.
 # It combines both infrastructure (NGINX, MongoDB) and application (n8n) services.
 
