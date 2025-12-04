@@ -26,8 +26,9 @@ if [ ! -d "$AVINA_DIR" ]; then
     exit 1
 fi
 
-if ! ls "${AVINA_DIR}/ssl/"*.crt &>/dev/null || ! ls "${AVINA_DIR}/ssl/"*.key &>/dev/null; then
-    echo "ERROR: SSL certificate (.crt) and/or private key (.key) not found in '${AVINA_DIR}/ssl/'."
+# Check for either a .crt or .pem file, along with a .key file
+if ! (ls "${AVINA_DIR}/ssl/"*.crt &>/dev/null || ls "${AVINA_DIR}/ssl/"*.pem &>/dev/null) || ! ls "${AVINA_DIR}/ssl/"*.key &>/dev/null; then
+    echo "ERROR: SSL certificate (.crt or .pem) and/or private key (.key) not found in '${AVINA_DIR}/ssl/'."
     echo "Please place your certificate files in the correct location before running this script."
     exit 1
 fi
