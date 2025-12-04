@@ -197,10 +197,12 @@ info "Creating .env file in $AVINA_DIR..."
 if ls "${AVINA_DIR}/ssl/"*.crt &>/dev/null && ls "${AVINA_DIR}/ssl/"*.key &>/dev/null; then
     info "SSL certificate and key found. Configuring NGINX for HTTPS."
     NGINX_CONFIG_FILE="nginx.conf"
+    N8N_PROTOCOL="https"
 else
     warn "SSL certificate not found. Configuring NGINX for HTTP-only access."
     warn "This is NOT secure for production. Please add your SSL certs to the 'ssl/' directory."
     NGINX_CONFIG_FILE="nginx-http.conf"
+    N8N_PROTOCOL="http"
 fi
 
 cat << EOF > "${AVINA_DIR}/.env"
@@ -222,6 +224,7 @@ MONGO_DATABASE=${MONGO_DATABASE}
 # --- Common ---
 N8N_UID=${CURRENT_UID}
 N8N_GID=${CURRENT_GID}
+N8N_PROTOCOL=${N8N_PROTOCOL}
 EOF
 success ".env file created."
 

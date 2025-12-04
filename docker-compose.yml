@@ -58,7 +58,7 @@ services:
     environment:
       # Configuration is loaded from the .env file
       - N8N_HOST=${DOMAIN}
-      - N8N_PROTOCOL=https
+      - N8N_PROTOCOL=${N8N_PROTOCOL}
       - N8N_PATH=/n8n/
       - N8N_PORT=5678
       - N8N_TRUST_PROXY=true
