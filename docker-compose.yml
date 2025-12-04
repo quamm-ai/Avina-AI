@@ -76,7 +76,8 @@ services:
       # but n8n won't use them for its internal database.
     volumes:
       # Use relative paths for portability
-      - ./data/n8n:/home/node/.n8n
+      # Map the entire home directory to persist .n8n config AND .cache
+      - ./data/n8n:/home/node
       - ./n8n/custom:/home/node/.n8n/custom
       # These paths are now located within the 'browser' directory
       - ./browser/uploads:/uploads
