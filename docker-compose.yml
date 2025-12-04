@@ -49,8 +49,8 @@ services:
 
   # --- Application Services ---
   n8n:
-    # Pinned to a specific version instead of 'latest'
-    image: n8nio/n8n:1.45.1
+    # Pinned to specific version for stability and security
+    image: n8nio/n8n:1.122.5
     container_name: avina-n8n
     deploy:
       resources:
