@@ -6,14 +6,14 @@ This project contains the complete infrastructure-as-code and deployment automat
 
 -   `install/`: Contains the master interactive installation script and its documentation.
 -   `docker-compose.yml`: Defines all infrastructure and application services (Nginx, MongoDB, n8n).
--   `nginx/`: Contains Nginx configurations for both HTTP (temporary) and HTTPS (secure) modes.
+-   `nginx/`: Contains Nginx configurations for secure HTTPS mode with a custom build process.
 -   `ssl/`: A placeholder for your custom SSL certificate and private key.
 -   `data/`: Stores persistent data volumes for services like MongoDB and n8n.
 -   `environments/`: Holds configuration templates for different deployment environments.
 -   `n8n/`: Contains n8n custom extensions and related configurations.
 -   `browser/`: Holds directories for file `uploads` and `downloads` used by services.
--   `static/`: A location for any static HTML content you want Nginx to serve.
--   `enable-ssl.sh`: A utility script to easily switch from HTTP to HTTPS mode after installation.
+-   `www/`: Contains the template for the dynamic landing page.
+-   `enable-ssl.sh`: A utility script to apply configuration changes and rebuild services.
 
 ## Database Configuration
 This project uses a hybrid database setup:
@@ -23,57 +23,52 @@ This project uses a hybrid database setup:
 ## Deployment
 The primary method for deploying a new Avina environment is through the interactive installation script. This script handles system preparation, Docker installation, project deployment, and service configuration in one automated flow.
 
-### SSL Configuration (IMPORTANT)
-This project supports two modes for web traffic:
-1.  **HTTP-Only (Default)**: If you run the installer without placing any files in the `ssl/` directory, the system will start in a temporary, insecure HTTP mode. This is ideal for initial setup and internal testing.
-2.  **HTTPS (Secure)**: If you place your wildcard SSL certificate (`.crt`) and private key (`.key`) in the `ssl/` directory *before* running the installer, the system will start in a fully secure HTTPS mode.
+### SSL Configuration (CRITICAL)
+For secure internal deployments, you must use a valid SSL certificate. Since we use internal Certificate Authorities (CAs), specific steps are required:
 
-You can easily switch from HTTP to HTTPS at any time after installation by placing your certificate files in `/srv/avina/ssl/` and running `sudo /srv/avina/enable-ssl.sh`.
+1.  **Server-Side (Linux)**:
+    - You must provide the **Full Certificate Chain**.
+    - Combine your server certificate (`server.crt`) and the Root CA certificate (`rootCA.pem`) into a single file:
+      ```bash
+      cat server.crt rootCA.pem > fullchain.pem
+      ```
+    - Place `fullchain.pem` and your private key (`server.key`) in the `/srv/avina/ssl/` directory.
+    - **Important**: The certificate MUST have the **Subject Alternative Name (SAN)** field correctly populated with your domain (e.g., `DNS:qa.avina.nkr.co.il`). Modern browsers will reject certificates without this field.
+
+2.  **Client-Side (Windows/Mac)**:
+    - Users accessing the system must trust the **Root CA**.
+    - Install the `rootCA.crt` (rename from `.pem`) into the **"Trusted Root Certification Authorities"** store on their local machine.
 
 ### Quick Start Guide
 
 1.  **Connect to your VM and Install Git:**
-    Log into your new, clean Ubuntu VM and install Git.
     ```bash
     sudo apt-get update && sudo apt-get install git -y
     ```
 
 2.  **Clone the Repository:**
-    Clone the project from GitHub into a temporary location, like your home directory.
     ```bash
     cd ~
     git clone https://github.com/quamm-ai/Avina-AI.git
     ```
     
-3.  **(Optional) Add SSL Certificate:**
-    If you have your SSL certificate and key, place them in the `ssl/` directory now.
-    ```bash
-    cp /path/to/your/certificate.crt ~/Avina-AI/ssl/
-    cp /path/to/your/private.key ~/Avina-AI/ssl/
-    ```
-
-4.  **Run the Installer:**
-    Navigate into the `install` directory, make the script executable, and run it with `sudo`. The script will handle copying the project to its final destination (`/srv/avina`).
+3.  **Run the Installer:**
     ```bash
     cd ~/Avina-AI/install/
     chmod +x install.sh
     sudo ./install.sh
     ```
 
-5.  **Follow the Prompts:**
-    The script will guide you through configuring the environment, including domain details and a secure password for the MongoDB database.
+4.  **Follow the Prompts:**
+    The script will guide you through configuring the environment.
 
 ### Manual Management
 After the initial deployment, you can manage the stack from the deployment directory (`/srv/avina`) using standard Docker Compose commands.
 
--   **Start all services:**
+-   **Apply Updates / Restart Services:**
     ```bash
-    docker compose up -d
-    ```
-
--   **Stop all services:**
-    ```bash
-    docker compose down
+    # This pulls new images and rebuilds the nginx container if config changed
+    docker compose up -d --build --force-recreate
     ```
 
 -   **View logs:**
@@ -83,6 +78,6 @@ After the initial deployment, you can manage the stack from the deployment direc
 
 ## Security
 
--   **Least Privilege:** The setup creates a dedicated `avina-admins` group for file permissions and relies on the `docker` group for container management, avoiding widespread `sudo` access.
--   **Secrets Management:** All sensitive values are managed in a `.env` file on the server, generated by the installer. This file should never be committed to version control.
--   **CRITICAL WARNING:** Users in the `docker` group have permissions equivalent to root on the host machine. Only add fully trusted administrators.
+-   **Least Privilege:** The setup creates a dedicated `avina-admins` group for file permissions and relies on the `docker` group for container management.
+-   **Secrets Management:** All sensitive values are managed in a `.env` file on the server.
+-   **Network Security:** Ensure your firewall only allows ports 80 and 443.

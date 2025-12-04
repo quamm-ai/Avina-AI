@@ -193,8 +193,10 @@ success "Project files deployed."
 
 info "Creating .env file in $AVINA_DIR..."
 # --- Determine which NGINX config to use ---
-# Check if both .crt and .key files exist in the ssl/ directory.
-if ls "${AVINA_DIR}/ssl/"*.crt &>/dev/null && ls "${AVINA_DIR}/ssl/"*.key &>/dev/null; then
+# Check if SSL certificates exist. We prioritize 'fullchain.pem' + 'server.key',
+# but will fallback to checking for any .crt/.key pair.
+if { [ -f "${AVINA_DIR}/ssl/fullchain.pem" ] && [ -f "${AVINA_DIR}/ssl/server.key" ]; } || \
+   { ls "${AVINA_DIR}/ssl/"*.crt &>/dev/null && ls "${AVINA_DIR}/ssl/"*.key &>/dev/null; }; then
     info "SSL certificate and key found. Configuring NGINX for HTTPS."
     NGINX_CONFIG_FILE="nginx.conf"
     N8N_PROTOCOL="https"

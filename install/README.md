@@ -10,30 +10,36 @@ The `install.sh` script is an all-in-one tool that automates the entire setup pr
 -   Deployment of the Avina project files to `/srv/avina`.
 -   Automatic generation of the `.env` configuration file.
 -   Automated management of user groups (`docker`, `avina-admins`).
--   Conditional setup of Nginx for either HTTP or HTTPS based on the presence of SSL certificates.
+-   Conditional setup of Nginx for either HTTP or HTTPS.
 -   Launching the full Docker Compose stack.
-
-This script is the recommended and primary method for all new deployments.
 
 ## How to Run
 
 1.  **Install Git and Clone Project:**
-    On a clean Ubuntu server, connect via SSH, install `git`, and clone the repository into your home directory.
     ```bash
     sudo apt-get update && sudo apt-get install git -y
     cd ~
     git clone https://github.com/quamm-ai/Avina-AI.git
     ```
 
-2.  **(Optional) Add SSL Certificate:**
-    If you want to start in secure HTTPS mode, place your SSL certificate (`.crt`) and private key (`.key`) in the `ssl/` directory now.
+2.  **Prepare SSL Certificates (CRITICAL Step):**
+    If you are deploying with HTTPS (Recommended), you must prepare your certificates *before* running the installer.
+    
+    **A. Create the Full Chain:**
+    Nginx requires the full certificate chain (Server Cert + Root CA) in a single file.
     ```bash
-    cp /path/to/your/certificate.crt ~/Avina-AI/ssl/
-    cp /path/to/your/private.key ~/Avina-AI/ssl/
+    # Combine your server certificate and root CA
+    cat server.crt rootCA.pem > fullchain.pem
+    ```
+    
+    **B. Place Files:**
+    Copy your files to the `ssl/` directory in the cloned repo:
+    ```bash
+    cp fullchain.pem ~/Avina-AI/ssl/
+    cp server.key ~/Avina-AI/ssl/
     ```
 
 3.  **Navigate and Execute:**
-    Change into this directory, make the script executable, and then run it with `sudo` privileges. The script will handle moving the project to its final destination (`/srv/avina`).
     ```bash
     cd ~/Avina-AI/install/
     chmod +x install.sh
@@ -41,10 +47,18 @@ This script is the recommended and primary method for all new deployments.
     ```
 
 4.  **Follow Prompts:**
-    Answer the questions provided by the script to configure your environment.
+    Answer the questions to configure your environment.
 
-## Post-Installation
+## Post-Installation Requirements
 
-Upon successful completion, the script will provide a URL to access the running `n8n` service. This will be an `http://` link if you installed without SSL, or an `https://` link if you provided certificates.
+### 1. Client-Side Trust
+For internal networks using a private Certificate Authority (CA):
+-   **Download the Root CA**: Get the `rootCA.pem` file from your IT team or the server.
+-   **Install on Windows**:
+    1.  Rename `rootCA.pem` to `rootCA.crt`.
+    2.  Double-click and select "Install Certificate".
+    3.  Choose **"Current User"** -> **"Place all certificates in the following store"** -> **"Trusted Root Certification Authorities"**.
+    4.  Restart your browser.
 
-**Crucially, all users who were granted administrative access (including the user who ran the script) must log out and log back in** for their new `docker` group permissions to take effect.
+### 2. User Permissions
+All users granted administrative access must **log out and log back in** for `docker` group permissions to take effect.
