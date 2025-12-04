@@ -5,27 +5,37 @@ This project contains the complete infrastructure-as-code and deployment automat
 ## Project Structure
 
 -   `install/`: Contains the master interactive installation script and its documentation.
--   `environments/`: Holds configuration templates for different deployment environments (QA, Production).
--   `docker-compose.infra.yml`: Defines the core infrastructure services (NGINX, Certbot, MongoDB).
--   `docker-compose.apps.yml`: Defines the application services (n8n, etc.).
--   `nginx/`: Contains the NGINX configuration and Dockerfile.
--   `data/`: Stores persistent data volumes for services like MongoDB and n8n's main database.
+-   `docker-compose.yml`: Defines all infrastructure and application services (Nginx, MongoDB, n8n).
+-   `nginx/`: Contains Nginx configurations for both HTTP (temporary) and HTTPS (secure) modes.
+-   `ssl/`: A placeholder for your custom SSL certificate and private key.
+-   `data/`: Stores persistent data volumes for services like MongoDB and n8n.
+-   `environments/`: Holds configuration templates for different deployment environments.
 -   `n8n/`: Contains n8n custom extensions and related configurations.
--   `browser/`: Holds directories for file `uploads` and `browser_downloads` used by services.
--   `certbot/`: Stores SSL certificates and Let's Encrypt account information.
--   `static/`: A location for any static HTML content you want NGINX to serve.
+-   `browser/`: Holds directories for file `uploads` and `downloads` used by services.
+-   `static/`: A location for any static HTML content you want Nginx to serve.
+-   `enable-ssl.sh`: A utility script to easily switch from HTTP to HTTPS mode after installation.
+
+## Database Configuration
+This project uses a hybrid database setup:
+-   **n8n** uses **SQLite** for its internal database, which is simple and officially supported. The database file is persisted in the `data/n8n` directory.
+-   **MongoDB** is included and available for any custom applications you choose to add to the cluster.
 
 ## Deployment
-
 The primary method for deploying a new Avina environment is through the interactive installation script. This script handles system preparation, Docker installation, project deployment, and service configuration in one automated flow.
+
+### SSL Configuration (IMPORTANT)
+This project supports two modes for web traffic:
+1.  **HTTP-Only (Default)**: If you run the installer without placing any files in the `ssl/` directory, the system will start in a temporary, insecure HTTP mode. This is ideal for initial setup and internal testing.
+2.  **HTTPS (Secure)**: If you place your wildcard SSL certificate (`.crt`) and private key (`.key`) in the `ssl/` directory *before* running the installer, the system will start in a fully secure HTTPS mode.
+
+You can easily switch from HTTP to HTTPS at any time after installation by placing your certificate files in `/srv/avina/ssl/` and running `sudo /srv/avina/enable-ssl.sh`.
 
 ### Quick Start Guide
 
 1.  **Connect to your VM and Install Git:**
     Log into your new, clean Ubuntu VM and install Git.
     ```bash
-    sudo apt-get update
-    sudo apt-get install git -y
+    sudo apt-get update && sudo apt-get install git -y
     ```
 
 2.  **Clone the Repository:**
@@ -34,8 +44,15 @@ The primary method for deploying a new Avina environment is through the interact
     cd ~
     git clone https://github.com/quamm-ai/Avina-AI.git
     ```
+    
+3.  **(Optional) Add SSL Certificate:**
+    If you have your SSL certificate and key, place them in the `ssl/` directory now.
+    ```bash
+    cp /path/to/your/certificate.crt ~/Avina-AI/ssl/
+    cp /path/to/your/private.key ~/Avina-AI/ssl/
+    ```
 
-3.  **Run the Installer:**
+4.  **Run the Installer:**
     Navigate into the `install` directory, make the script executable, and run it with `sudo`. The script will handle copying the project to its final destination (`/srv/avina`).
     ```bash
     cd ~/Avina-AI/install/
@@ -43,32 +60,25 @@ The primary method for deploying a new Avina environment is through the interact
     sudo ./install.sh
     ```
 
-4.  **Follow the Prompts:**
-    The script will guide you through a series of questions to configure the environment:
-    -   Environment type (qa/prod)
-    -   Client domain details
-    -   Secure password for the database
-    -   Usernames of administrators
-
-The script will automatically perform all necessary setup, including acquiring the SSL certificate and launching the Docker containers.
+5.  **Follow the Prompts:**
+    The script will guide you through configuring the environment, including domain details and a secure password for the MongoDB database.
 
 ### Manual Management
-
 After the initial deployment, you can manage the stack from the deployment directory (`/srv/avina`) using standard Docker Compose commands.
 
 -   **Start all services:**
     ```bash
-    docker-compose up -d
+    docker compose up -d
     ```
 
 -   **Stop all services:**
     ```bash
-    docker-compose down
+    docker compose down
     ```
 
 -   **View logs:**
     ```bash
-    docker-compose logs -f
+    docker compose logs -f
     ```
 
 ## Security

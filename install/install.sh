@@ -234,9 +234,9 @@ chmod -R 2775 "$AVINA_DIR"
 
 # Fix n8n data directory permissions to match the container user
 # The n8n container runs as the current user (N8N_UID), so we ensure ownership matches.
-if [ -d "${AVINA_DIR}/data/n8n" ]; then
-    info "Fixing permissions for n8n data directory..."
-    chown -R "${CURRENT_UID}:${CURRENT_GID}" "${AVINA_DIR}/data/n8n"
+if [ -d "${AVINA_DIR}/data" ]; then
+    info "Fixing permissions for data directories..."
+    chown -R "${CURRENT_UID}:${CURRENT_GID}" "${AVINA_DIR}/data"
 fi
 
 info "Adding users to required groups..."
@@ -274,7 +274,11 @@ echo -e "✅ DEPLOYMENT COMPLETE"
 echo -e "==================================================${C_NONE}"
 echo
 echo "The Avina cluster is now running."
-echo "You should be able to access n8n at: https://${DOMAIN}/n8n/"
+if [ "$N8N_PROTOCOL" == "https" ]; then
+    echo "You can access n8n at: https://${DOMAIN}/n8n/"
+else
+    echo "You can access n8n at: http://${DOMAIN}/n8n/ (or via the server's IP address)."
+fi
 echo
 warn "!!! IMPORTANT FINAL STEP !!!"
 warn "All administrative users, including '$SUDO_USER', MUST log out"
