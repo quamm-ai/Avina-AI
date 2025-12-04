@@ -13,9 +13,10 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/${NGINX_CONFIG_FILE}:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/ssl/private
-      - ./static:/var/www/static_html:ro # Optional: for serving static content
+      - ./nginx/nginx.conf:/etc/nginx/templates/nginx.conf.template:ro
+      - ./ssl:/etc/ssl/private:ro
+      # Mount the new directory for the static landing page
+      - ./www:/var/www/static_html:ro
     networks:
       - avina_network
     depends_on:
